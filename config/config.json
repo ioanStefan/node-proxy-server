@@ -1,0 +1,11 @@
+{
+    "servers": [{
+        "hostname": "",
+        "port": "",
+        "encSecretKey": "",
+        "encAlgorithm": "",
+        "valueToEncrypt": "",
+        "status": ""
+    }],
+    "proxyQR": ""
+}
