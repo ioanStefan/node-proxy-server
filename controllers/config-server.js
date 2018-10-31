@@ -71,6 +71,18 @@ class ConfigServer {
         })
 
     }
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    establishConnection(req, res) {
+        console.log("Connection established!");
+
+        res.json({
+            msg: 'Connection established'
+        })
+    }
 }
 
-module.exports = ConfigServer;
+module.exports = new ConfigServer();

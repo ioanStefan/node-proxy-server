@@ -1,9 +1,11 @@
 var express = require('express');
 var router = express.Router();
 
+var ConfigServer = require('../controllers/config-server');
+
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+router.get('/connection', function (req, res, next) {
+  ConfigServer.establishConnection(req, res);
 });
 
 module.exports = router;
