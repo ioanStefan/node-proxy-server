@@ -1,3 +1,5 @@
+var request = require('request');
+
 class ProxyServer {
     constructor() {
 
@@ -11,39 +13,35 @@ class ProxyServer {
         console.log(req.headers.host);
         return true;
     }
-    /**
-     * Encrypt the content of the request based on host target.
-     * @param {Request} bodyContent 
-     * @param {String} hostTarget 
-     * @private
-     */
-    proxyReqBodyDecorator(bodyContent, hostTarget) {
+
+    proxyGetRequest(req, res) {
+        // Request get with JSON
+
+        request.get('http://172.17.0.111:3001', function (err, response, body) {
+            let jsonBody = JSON.parse(body);
+            return res.json({
+                msg: jsonBody.msg
+            })
+        })
 
     }
-    /**
-     * Decrypt the content of the proxy.
-     * @param {Object} proxyResData 
-     * @private
-     */
-    hostResDecorator(proxyResData) {}
-    /**
-     * 
-     * @param {Request} req 
-     * @param {Response} res 
-     * @param {String} hostTarget 
-     */
-    proxyRequest(req, res, hostTarget) {}
-    /**
-     * 
-     * @param {Request} req 
-     * @param {Response} res 
-     * @param {Function} next 
-     */
-    proxy(req, res, next) {
-        console.log(this);
 
-        // this.proxyReqHostResolver(req);
-        // this.proxyReqBodyDecorator(req.body)
+    proxyPostRequest(req, res) {
+        // Request post with JSON
+
+        request.post('http://172.17.0.111:3001', {
+            form: {
+                msg: req.body.msg
+            }
+        }, function (err, response, body) {
+            let jsonResponse = JSON.parse(response.body);
+            jsonResponse.msg = jsonResponse.msg + " AM adaugat aici ceva in plus dupa ce am primit mesajul";
+
+            return res.json({
+                msg: jsonResponse.msg
+            })
+        })
+        ProxyServer.proxy(req, res, next);
     }
 }
 
