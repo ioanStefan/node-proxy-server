@@ -13,10 +13,14 @@ class ProxyServer {
         console.log(req.headers.host);
         return true;
     }
-
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
     proxyGetRequest(req, res) {
         // Request get with JSON
-
+        console.log(req.url);
         request.get('http://172.17.0.111:3001', function (err, response, body) {
             let jsonBody = JSON.parse(body);
             return res.json({
@@ -25,10 +29,14 @@ class ProxyServer {
         })
 
     }
-
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
     proxyPostRequest(req, res) {
         // Request post with JSON
-
+        console.log(req.url)
         request.post('http://172.17.0.111:3001', {
             form: {
                 msg: req.body.msg
