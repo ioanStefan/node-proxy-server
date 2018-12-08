@@ -47,8 +47,18 @@ class ProxyServer {
      */
     proxyGetRequest(req, res) {
         // Request get with JSON
-        console.log(req.url);
-        request.get('http://192.168.1.4:3000/encreq', function (err, response, body) {
+        let proxyHost = this.proxyReqHostResolver(req);
+
+        if (!proxyHost)
+            return res.send('<h1>No access!</h1>');
+
+        request.post(`http://${proxyHost}/encreq`, {
+            form: {
+                targetHost: this.proxyTargetHost,
+                targetPort: this.proxyTargetPort,
+                method: "GET"
+            }
+        }, function (err, response, body) {
             // let jsonBody = JSON.parse(body);
             return res.json({
                 msg: body
@@ -86,6 +96,7 @@ class ProxyServer {
      * @param {Response} res 
      */
     proxyEncryptRequest(req, res) {
+        console.log(req.body);
         res.send('<h1>Hello world</h1>')
     }
 }
