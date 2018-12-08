@@ -4,8 +4,12 @@
         "port": "",
         "encSecretKey": "",
         "encAlgorithm": "",
-        "valueToEncrypt": "",
-        "status": ""
+        "status": "",
+        "proxyTo": [{
+            "host": "localhost",
+            "port": "3000"
+        }]
     }],
-    "proxyQR": ""
+    "proxyQR": "",
+    "encKeyForKeys": ""
 }

@@ -8,16 +8,29 @@ let request = require('request');
 /* Proxy request */
 
 /**
- * All GET request will pe proxyed through function bellow.
+ * All GET request from local clients will pe proxyed through function bellow.
  */
 router.get('/', function (req, res, next) {
-  ProxyServer.proxyGetRequest(req, res);
+  // console.log(req.headers.host, req.headers);
+
+  ProxyServer.proxyReqHostResolver(req);
+  res.json({
+    headers: req.headers,
+    url: req.baseUrl
+  });
+  // ProxyServer.proxyGetRequest(req, res);
 })
 /**
- * All POST requests will be proxyed through function bellow.
+ * All POST requests from local clients will be proxyed through function bellow.
  */
 router.post('/', function (req, res, next) {
   ProxyServer.proxyPostRequest(req, res);
 });
+/**
+ * All requests from Internet clients will be proxyed through function bellow.
+ */
+router.post('/encreq', function (req, res, next) {
+  ProxyServer.proxyEncryptRequest(req, res);
+})
 
 module.exports = router;
