@@ -47,15 +47,14 @@ class ProxyServer {
      */
     proxyGetRequest(req, res) {
         // Request get with JSON
-        let proxyHost = this.proxyReqHostResolver(req);
+        let targetClient = this.proxyReqHostResolver(req);
 
         if (!proxyHost)
             return res.send('<h1>No access!</h1>');
 
-        request.post(`http://${proxyHost}/encreq`, {
+        request.post(`http://${this.proxyTargetHost}:${this.proxyTargetPort}/encreq`, {
             form: {
-                targetHost: this.proxyTargetHost,
-                targetPort: this.proxyTargetPort,
+                targetClient: targetClient,
                 method: "GET"
             }
         }, function (err, response, body) {
