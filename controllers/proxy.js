@@ -48,10 +48,10 @@ class ProxyServer {
     proxyGetRequest(req, res) {
         // Request get with JSON
         console.log(req.url);
-        request.get('http://172.17.0.111:3001', function (err, response, body) {
-            let jsonBody = JSON.parse(body);
+        request.get('http://192.168.1.4:3000/encreq', function (err, response, body) {
+            // let jsonBody = JSON.parse(body);
             return res.json({
-                msg: jsonBody.msg
+                msg: body
             })
         })
 
@@ -86,7 +86,7 @@ class ProxyServer {
      * @param {Response} res 
      */
     proxyEncryptRequest(req, res) {
-
+        res.send('<h1>Hello world</h1>')
     }
 }
 
