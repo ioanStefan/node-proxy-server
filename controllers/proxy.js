@@ -16,7 +16,7 @@ class ProxyServer {
     proxyReqHostResolver(req) {
         // GET requested client host and baseURL
         const host = req.headers.host;
-        const baseURL = req.baseURL;
+        const baseURL = req.baseUrl;
 
         // Read config/config.json file
         let config = JSON.parse(fs.readFileSync("config/config.json", 'UTF8'));
@@ -26,7 +26,7 @@ class ProxyServer {
         for (let s in servers) {
             let proxyTo = servers[s].proxyTo;
             let hostIP = host.split(':')[0];
-            let hostPORT = host.split(':')[1];
+            let hostPORT = host.split(':')[1] || "";
             for (let p in proxyTo) {
                 if (proxyTo[p].host == hostIP && proxyTo[p].port == hostPORT) {
                     this.proxyTargetHost = servers[s].hostname;
@@ -49,12 +49,16 @@ class ProxyServer {
         // Request get with JSON
         let targetClient = this.proxyReqHostResolver(req);
 
-        if (!proxyHost)
+        if (!targetClient)
             return res.send('<h1>No access!</h1>');
 
         request.post(`http://${this.proxyTargetHost}:${this.proxyTargetPort}/encreq`, {
             form: {
-                targetClient: targetClient,
+                targetClient: {
+                    host: targetClient,
+                    encAlg: this.proxyTargetEncAlgorithm,
+                    encSecretKey: this.proxyTargetEncSecretKey
+                },
                 method: "GET"
             }
         }, function (err, response, body) {
@@ -73,20 +77,39 @@ class ProxyServer {
      */
     proxyPostRequest(req, res) {
         // Request post with JSON
-        console.log(req.url)
-        request.post('http://172.17.0.111:3001', {
+        // console.log(req.url)
+        // request.post('http://172.17.0.111:3001', {
+        //     form: {
+        //         msg: req.body.msg
+        //     }
+        // }, function (err, response, body) {
+        //     let jsonResponse = JSON.parse(response.body);
+        //     jsonResponse.msg = jsonResponse.msg + " AM adaugat aici ceva in plus dupa ce am primit mesajul";
+
+        //     return res.json({
+        //         msg: jsonResponse.msg
+        //     })
+        // })
+        // ProxyServer.proxy(req, res, next);
+
+        // Request get with JSON
+        let targetClient = this.proxyReqHostResolver(req);
+
+        if (!targetClient)
+            return res.send('<h1>No access!</h1>');
+
+        request.post(`http://${this.proxyTargetHost}:${this.proxyTargetPort}/encreq`, {
             form: {
-                msg: req.body.msg
+                targetClient: targetClient,
+                method: "POST",
+                data: {}
             }
         }, function (err, response, body) {
-            let jsonResponse = JSON.parse(response.body);
-            jsonResponse.msg = jsonResponse.msg + " AM adaugat aici ceva in plus dupa ce am primit mesajul";
-
+            // let jsonBody = JSON.parse(body);
             return res.json({
-                msg: jsonResponse.msg
+                msg: body
             })
         })
-        ProxyServer.proxy(req, res, next);
     }
     /**
      * A function that handle GET/POST request from a proxy server.
@@ -95,8 +118,36 @@ class ProxyServer {
      * @param {Response} res 
      */
     proxyEncryptRequest(req, res) {
-        console.log(req.body);
-        res.send('<h1>Hello world</h1>')
+
+        let targetClient = req.body.targetClient;
+        let method = req.body.method;
+        let data = req.body.data || "";
+
+        switch (method) {
+            case "GET":
+                request.get(targetClient.host,
+                    function (err, response, body) {
+                        // Encrypt data and send back to the client
+                        res.json({
+                            data: {}
+                        });
+                    })
+                break;
+            case "POST":
+                request.post(targetClient.host, {
+                    form: {
+                        data
+                    }
+                }, function (err, response, body) {
+                    // Encrypt data and send back to the client
+                    res.json({
+                        data: {}
+                    });
+                })
+                break;
+            default:
+                break;
+        }
     }
 }
 

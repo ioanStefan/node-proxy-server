@@ -13,12 +13,15 @@ let request = require('request');
 router.get('/', function (req, res, next) {
   // console.log(req.headers.host, req.headers);
 
-  ProxyServer.proxyReqHostResolver(req);
-  res.json({
-    headers: req.headers,
-    url: req.baseUrl
-  });
+  // ProxyServer.proxyReqHostResolver(req);
+
+  // res.json({
+  //   headers: req.headers,
+  //   url: req.baseUrl
+  // });
   // ProxyServer.proxyGetRequest(req, res);
+
+  ProxyServer.proxyGetRequest(req, res);
 })
 /**
  * All POST requests from local clients will be proxyed through function bellow.
@@ -26,11 +29,5 @@ router.get('/', function (req, res, next) {
 router.post('/', function (req, res, next) {
   ProxyServer.proxyPostRequest(req, res);
 });
-/**
- * All requests from Internet clients will be proxyed through function bellow.
- */
-router.post('/encreq', function (req, res, next) {
-  ProxyServer.proxyEncryptRequest(req, res);
-})
 
 module.exports = router;
