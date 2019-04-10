@@ -1,5 +1,6 @@
 var request = require('request');
 const fs = require('fs');
+const crypto = require('crypto');
 
 class ProxyServer {
     constructor() {
@@ -33,6 +34,7 @@ class ProxyServer {
                     this.proxyTargetPort = servers[s].port;
                     this.proxyTargetEncSecretKey = servers[s].encSecretKey;
                     this.proxyTargetEncAlgorithm = servers[s].encAlgorithm;
+
                     return `http://${host + baseURL}`;
                 }
             }
@@ -46,24 +48,32 @@ class ProxyServer {
      * @param {Response} res 
      */
     proxyGetRequest(req, res) {
-        // Request get with JSON
+        // Request GET with JSON
         let targetClient = this.proxyReqHostResolver(req);
 
         if (!targetClient)
-            return res.send('<h1>No access!</h1>');
+            return res.status(404).send('<h1>Not found!</h1>');
+
+        // Encrypt targetClient
+        targetClient = this.encrypt(targetClient, this.proxyTargetEncSecretKey, this.proxyTargetEncAlgorithm);
+
 
         request.post(`http://${this.proxyTargetHost}:${this.proxyTargetPort}/encreq`, {
             form: {
                 targetClient: {
                     host: targetClient,
-                    encAlg: this.proxyTargetEncAlgorithm,
-                    encSecretKey: this.proxyTargetEncSecretKey
+                    encAlg: this.proxyTargetEncAlgorithm
                 },
                 method: "GET"
             }
-        }, function (err, response, body) {
-            // let jsonBody = JSON.parse(body);
-            return res.json({
+        }, (err, response, body) => {
+            // let jsonBody = JSON.parse(body);  
+            // console.log(this.proxyTargetHost);
+            if (err)
+                return res.status(404).send('<h1>Not found!</h1>');
+
+            // If success decrypt response and send to client            
+            return res.status(response.statusCode).json({
                 msg: body
             })
         })
@@ -76,27 +86,13 @@ class ProxyServer {
      * @param {Response} res 
      */
     proxyPostRequest(req, res) {
-        // Request post with JSON
-        // console.log(req.url)
-        // request.post('http://172.17.0.111:3001', {
-        //     form: {
-        //         msg: req.body.msg
-        //     }
-        // }, function (err, response, body) {
-        //     let jsonResponse = JSON.parse(response.body);
-        //     jsonResponse.msg = jsonResponse.msg + " AM adaugat aici ceva in plus dupa ce am primit mesajul";
-
-        //     return res.json({
-        //         msg: jsonResponse.msg
-        //     })
-        // })
-        // ProxyServer.proxy(req, res, next);
-
-        // Request get with JSON
+        // Request POST with JSON
         let targetClient = this.proxyReqHostResolver(req);
 
         if (!targetClient)
-            return res.send('<h1>No access!</h1>');
+            return res.status(404).send('<h1>Not found!</h1>');
+
+        // Encrypt targetClient
 
         request.post(`http://${this.proxyTargetHost}:${this.proxyTargetPort}/encreq`, {
             form: {
@@ -106,7 +102,11 @@ class ProxyServer {
             }
         }, function (err, response, body) {
             // let jsonBody = JSON.parse(body);
-            return res.json({
+            if (err)
+                return res.status(404).send('<h1>Not found!</h1>');
+
+            // If success decrypt response and send to client
+            return res.status(response.statusCode).json({
                 msg: body
             })
         })
@@ -149,6 +149,36 @@ class ProxyServer {
                 break;
         }
     }
+    /**
+     * A function that encrypt request data and response data
+     * @param {String} data
+     * @param {String} key
+     * @param {String} strategy
+     */
+    encrypt(data, key, strategy) {
+
+        switch (strategy) {
+            case 'AES-CTR':
+                const iv = crypto.randomBytes(16);
+                const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key, 'hex'), iv);
+
+                let encrypted = cipher.update(data);
+                encrypted = Buffer.concat([encrypted, cipher.final()]);
+                return {
+                    iv: iv.toString('hex'),
+                    ecrypted: encrypted.toString('hex')
+                }
+            default:
+                break;
+        }
+
+    }
+    /**
+     * A function that decrypt request data and response data
+     */
+    decrypt(data, key, strategy) {
+
+    }
 }
 
-module.exports = new ProxyServer();
+module.exports = ProxyServer;

@@ -1,9 +1,9 @@
 {
     "servers": [{
-        "hostname": "192.168.1.5",
+        "hostname": "192.168.1.9",
         "port": "3001",
-        "encSecretKey": "4dr!4Ns7Ef4N",
-        "encAlgorithm": "des",
+        "encSecretKey": "42063b99c3237fce9eaab7b15e0940c15fc7c87d7309bfca848b08e3b7d879fb",
+        "encAlgorithm": "AES-CTR",
         "status": "active",
         "proxyTo": [{
             "host": "192.168.2.10",

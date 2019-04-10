@@ -3,7 +3,7 @@ var router = express.Router();
 
 var ProxyServer = require('../controllers/proxy');
 
-let request = require('request');
+const crypto = require('crypto');
 
 /* Proxy request */
 
@@ -11,22 +11,20 @@ let request = require('request');
  * All GET request from local clients will pe proxyed through function bellow.
  */
 router.get('/', function (req, res, next) {
-  // console.log(req.headers.host, req.headers);
 
-  // ProxyServer.proxyReqHostResolver(req);
+  console.log(req.baseUrl)
 
-  // res.json({
-  //   headers: req.headers,
-  //   url: req.baseUrl
-  // });
-  // ProxyServer.proxyGetRequest(req, res);
-  ProxyServer.proxyGetRequest(req, res);
+  const proxyServer = new ProxyServer();
+
+  proxyServer.proxyGetRequest(req, res);
+
 })
 /**
  * All POST requests from local clients will be proxyed through function bellow.
  */
 router.post('/', function (req, res, next) {
-  ProxyServer.proxyPostRequest(req, res);
+  const proxyServer = new ProxyServer();
+  proxyServer.proxyPostRequest(req, res);
 });
 
 module.exports = router;
