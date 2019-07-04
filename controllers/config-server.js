@@ -3,73 +3,270 @@ var fs = require('fs');
 class ConfigServer {
 
     constructor() {}
-
     /**
-     * Add a new server where to proxy requests.
+     * Metoda returnează fișierul de configurare.
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    getServers(req, res) {
+        let configuration =
+            JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+        return res.json({
+            configuration
+        })
+    }
+    /**
+     * Adăugarea unui nou server proxy
      * @param {Request} req 
      * @param {Response} res 
      * @param {Function} next 
      */
     setNewServer(req, res, next) {
-        let newServer = req.body.newServer;
+        let newServer = req.body;
         newServer.status = "inactive";
-
-        // Add new server to config.json
-        let configuration = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
-
+        let configuration =
+            JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
         configuration.servers.push(newServer);
-
-        fs.writeFile('config/config.json', this.configuration, (err) => {
-            console.log(err);
-
-            return res.json({
-                success: false,
-                msg: "Can't add this server!"
+        fs.writeFile('config/config.json',
+            JSON.stringify(configuration), (err) => {
+                if (err)
+                    return res.status(500);
             })
-        })
-
-        return res.json({
-            success: true,
-            msg: "Added successfully!"
-        })
+        return res.status(200);
     }
-
     /**
-     * Remove a server from the system.
+     * Modificarea datelor unui server proxy
      * @param {Request} req 
      * @param {Response} res 
      * @param {Function} next 
      */
-    removeServer(req, res, next) {
-
-        let configuration = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+    updateServer(req, res, next) {
+        let server = req.body;
+        let configuration =
+            JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
         let servers = configuration.servers;
-
-        let server_host = req.body.server_host;
-
         for (let i = 0; i < servers.length; i++) {
-            if (servers[i].hostname === server_host) {
+            if (servers[i].hostname === server.hostname) {
+                servers[i].port = server.port;
+                servers[i].encSecretKey = server.encSecretKey;
+                servers[i].encAlgorithm = server.encAlgorithm;
+                servers[i].details = server.details;
+                break;
+            }
+        }
+        configuration.servers = servers;
+        fs.writeFile('config/config.json', JSON.stringify(configuration), (err) => {
+
+            if (err)
+                return res.status(500);
+
+            return res.status(200);
+        });
+    }
+    /**
+     * Eliminarea unui server proxy
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    removeServer(req, res) {
+        let configuration =
+            JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+        let servers = configuration.servers;
+        let hostname = req.params['hostname'];
+        for (let i = 0; i < servers.length; i++) {
+            if (servers[i].hostname === hostname) {
                 servers.splice(i, 1);
                 break;
             }
         }
-
         configuration.servers = servers;
+        fs.writeFile('config/config.json',
+            JSON.stringify(configuration), (err) => {
+                if (err) {
+                    console.log(err)
+                    return res.status(500);
+                }
 
-        fs.writeFile('config/config.json', this.configuration, (err) => {
-            console.log(err);
-
-            return res.json({
-                success: false,
-                msg: "Can't add this server!"
+                return res.status(200);
             })
-        })
+    }
+    /**
+     * Adaăugarea unei resurse noi
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    addNewtarget(req, res) {
+        let newTarget = req.body;
+        let configuration =
+            JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+        let servers = configuration.servers;
+        for (let i = 0; i < servers.length; i++) {
+            if (servers[i].hostname === newTarget.proxy) {
+                let proxyTo = servers[i].proxyTo || [];
 
-        return res.json({
-            success: true,
-            msg: "Added successfully!"
-        })
+                proxyTo.push({
+                    host: newTarget.host,
+                    port: newTarget.port,
+                    details: newTarget.details
+                });
 
+                servers[i].proxyTo = proxyTo;
+
+                break;
+            }
+        }
+        configuration.servers = servers;
+        fs.writeFile('config/config.json',
+            JSON.stringify(configuration), (err) => {
+                if (err)
+                    return res.status(500);
+                return res.status(200);
+            })
+    }
+    /**
+     * Modificarea informatțiilor unei resurse
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    updateTarget(req, res) {
+        let target = req.body;
+        let configuration =
+            JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+        let servers = configuration.servers;
+        let flag = false;
+        for (let i = 0; i < servers.length; i++) {
+            if (servers[i].hostname === target.proxy) {
+                let proxyTo = servers[i].proxyTo;
+
+                for (let j = 0; j < proxyTo.length; j++) {
+                    if (proxyTo[j].host == target.host) {
+                        proxyTo[j].port = target.port;
+                        proxyTo[j].details = target.details;
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag) {
+                    servers[i].proxyTo = proxyTo;
+                    break;
+                }
+
+            }
+        }
+        configuration.servers = servers;
+        fs.writeFile('config/config.json',
+            JSON.stringify(configuration), (err) => {
+
+                if (err)
+                    return res.status(500);
+                return res.status(200);
+            });
+    }
+    /**
+     * Eliminarea unei resurse
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    removeTarget(req, res) {
+        let configuration =
+            JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+        let servers = configuration.servers;
+        let proxy = req.params['proxy'];
+        let target = req.params['target'];
+        for (let i = 0; i < servers.length; i++) {
+            if (servers[i].hostname === proxy) {
+                let targets = servers[i].proxyTo;
+                for (let j = 0; j < targets.length; j++) {
+                    if (targets[j].host == target) {
+                        targets.splice(j, 1);
+                        break;
+                    }
+                }
+                servers[i].proxyTo = targets;
+                break;
+            }
+        }
+        configuration.servers = servers;
+        fs.writeFile('config/config.json',
+            JSON.stringify(configuration), (err) => {
+                if (err) {
+                    console.log(err)
+                    return res.status(500);
+                }
+                return res.status(200);
+            })
+    }
+    /**
+     * Adăugarea unei resurse interne
+     * @param {Request} req 
+     * @param {Response} res 
+     * @param {Function} next 
+     */
+    addNewInternalHost(req, res, next) {
+        let newServer = req.body;
+        let configuration =
+            JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+        configuration.internalHosts.push(newServer);
+        fs.writeFile('config/config.json',
+            JSON.stringify(configuration), (err) => {
+                if (err)
+                    return res.status(500);
+
+                return res.status(200);
+            })
+    }
+    /**
+     * Modificarea informațiilor unei resurse interne
+     * @param {Request} req 
+     * @param {Response} res 
+     * @param {Function} next 
+     */
+    updateInternalHost(req, res, next) {
+        let internalHost = req.body;
+        let configuration =
+            JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+        let internalHosts = configuration.internalHosts;
+        for (let i = 0; i < internalHosts.length; i++) {
+            if (internalHosts[i].host === internalHost.host) {
+                internalHosts[i].port = internalHost.port;
+                internalHosts[i].key = internalHost.key;
+                internalHosts[i].encAlgorithm = internalHost.encAlgorithm;
+                internalHosts[i].details = internalHost.details;
+                break;
+            }
+        }
+        configuration.internalHosts = internalHosts;
+        fs.writeFile('config/config.json', JSON.stringify(configuration), (err) => {
+
+            if (err)
+                return res.status(500);
+            return res.status(200);
+        });
+    }
+    /**
+     * Eliminarea unei resurse.
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    removeInternalHost(req, res) {
+        let configuration = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+        let internalHosts = configuration.internalHosts;
+        let hostname = req.params['host'];
+        for (let i = 0; i < servers.length; i++) {
+            if (internalHosts[i].host === hostname) {
+                internalHosts.splice(i, 1);
+                break;
+            }
+        }
+        configuration.internalHosts = internalHosts;
+        fs.writeFile('config/config.json', JSON.stringify(configuration), (err) => {
+            if (err) {
+                console.log(err)
+                return res.status(500);
+            }
+
+            return res.status(200);
+        })
     }
     /**
      * 

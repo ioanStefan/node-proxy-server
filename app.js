@@ -1,5 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
+var xmlMid = require('express-xml-bodyparser');
+var textMid = require('body-parser');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -7,7 +9,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var encReq = require('./routes/encreq');
 var configRouter = require('./routes/config-server');
-
+var test = require('./routes/test');
 var app = express();
 
 // view engine setup
@@ -16,15 +18,22 @@ app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(express.json());
+app.use(xmlMid());
+app.use(textMid.text());
 app.use(express.urlencoded({
   extended: false
 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/test', test);
 app.use('/config', configRouter);
 app.use('/encreq', encReq);
 app.use('*', indexRouter);
+
+app.get('/nume_ruta', function (req, res, next) {
+  // do something
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

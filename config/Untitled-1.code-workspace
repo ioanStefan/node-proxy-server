@@ -1,0 +1,41 @@
+{   
+    // Listă de servere proxy
+    "servers": [{
+        // Adresa server proxy
+        "hostname": "",
+        // Port server proxy
+        "port": "",
+        // Cheia utilizată pentru critare/decriptare
+        "encSecretKey": "",
+        // Algoritm utilizat pentru criptare/decriptare
+        "encAlgorithm": "",
+        // Listă resurse asociate serverului proxy
+        "proxyTo": [{
+            // Adresă resursă
+            "host": "",
+            // Port resursă
+            "port": "",
+            // Detalii resursă
+            "details": ""
+        }],
+        // Detalii server proxy
+        "details": ""
+    }],
+    // Listă resurse interne
+    "internalHosts": [{
+        // Adresă resursă internă
+        "host": "",
+        // Port resursă internă
+        "port": "",
+        // Cheie utilizată pentru criptare/decriptare
+        "key": "",
+        // Algoritm utilizat pentru criptare/decriptare
+        "encAlgorithm": "",
+        // Detalii resursă internă
+        "details": ""
+    }],
+    // Codul de autentificare al serverului proxy
+    "proxyQR": "",
+    // Cheia de criptare a adreselor
+    "encKeyForHosts": ""
+}
