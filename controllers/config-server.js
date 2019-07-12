@@ -2,7 +2,7 @@ var fs = require('fs');
 
 class ConfigServer {
 
-    constructor() {}
+    constructor() { }
     /**
      * Metoda returnează fișierul de configurare.
      * @param {Request} req 
@@ -30,9 +30,9 @@ class ConfigServer {
         fs.writeFile('config/config.json',
             JSON.stringify(configuration), (err) => {
                 if (err)
-                    return res.status(500);
+                    return res.status(500).end();
             })
-        return res.status(200);
+        return res.status(200).end();
     }
     /**
      * Modificarea datelor unui server proxy
@@ -58,9 +58,9 @@ class ConfigServer {
         fs.writeFile('config/config.json', JSON.stringify(configuration), (err) => {
 
             if (err)
-                return res.status(500);
+                return res.status(500).end();
 
-            return res.status(200);
+            return res.status(200).end();
         });
     }
     /**
@@ -84,10 +84,10 @@ class ConfigServer {
             JSON.stringify(configuration), (err) => {
                 if (err) {
                     console.log(err)
-                    return res.status(500);
+                    return res.status(500).end();
                 }
 
-                return res.status(200);
+                return res.status(200).end();
             })
     }
     /**
@@ -119,8 +119,8 @@ class ConfigServer {
         fs.writeFile('config/config.json',
             JSON.stringify(configuration), (err) => {
                 if (err)
-                    return res.status(500);
-                return res.status(200);
+                    return res.status(500).end();
+                return res.status(200).end();
             })
     }
     /**
@@ -158,8 +158,8 @@ class ConfigServer {
             JSON.stringify(configuration), (err) => {
 
                 if (err)
-                    return res.status(500);
-                return res.status(200);
+                    return res.status(500).end();
+                return res.status(200).end();
             });
     }
     /**
@@ -191,9 +191,9 @@ class ConfigServer {
             JSON.stringify(configuration), (err) => {
                 if (err) {
                     console.log(err)
-                    return res.status(500);
+                    return res.status(500).end();
                 }
-                return res.status(200);
+                return res.status(200).end();
             })
     }
     /**
@@ -210,9 +210,9 @@ class ConfigServer {
         fs.writeFile('config/config.json',
             JSON.stringify(configuration), (err) => {
                 if (err)
-                    return res.status(500);
+                    return res.status(500).end();
 
-                return res.status(200);
+                return res.status(200).end();
             })
     }
     /**
@@ -239,8 +239,8 @@ class ConfigServer {
         fs.writeFile('config/config.json', JSON.stringify(configuration), (err) => {
 
             if (err)
-                return res.status(500);
-            return res.status(200);
+                return res.status(500).end();
+            return res.status(200).end();
         });
     }
     /**
@@ -262,10 +262,10 @@ class ConfigServer {
         fs.writeFile('config/config.json', JSON.stringify(configuration), (err) => {
             if (err) {
                 console.log(err)
-                return res.status(500);
+                return res.status(500).end();
             }
 
-            return res.status(200);
+            return res.status(200).end();
         })
     }
     /**

@@ -33,7 +33,7 @@ class Test {
 
         let encrypted = ps.encrypt(text, key, alg);
 
-        request.post(`http://${server}:3010/test/resolve`, {
+        request.post(`http://${server}:${port}/test/resolve`, {
             form: {
                 data: encrypted,
                 key,

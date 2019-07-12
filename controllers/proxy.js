@@ -92,8 +92,10 @@ class ProxyServer {
             // Se decriptează datele primite
             const dataDecrypted = this.decrypt(data.encrypted,
                 this.proxyTargetEncSecretKey, data.iv, this.proxyTargetEncAlgorithm);
+
+            console.log(contentType)
             // Se verifică tipul de răspuns așteptat de client.
-            if (contentType === 'text/html') {
+            if (contentType === 'text/html' || contentType === undefined) {
                 return res.status(response.statusCode).send(dataDecrypted);
             } else if (contentType === 'application/json') {
                 return res.status(response.statusCode).json(
@@ -262,7 +264,7 @@ class ProxyServer {
                 encrypted = Buffer.concat([encrypted, cipher.final()]);
                 return {
                     iv: iv.toString('hex'),
-                        encrypted: encrypted.toString('hex')
+                    encrypted: encrypted.toString('hex')
                 };
             case 'aes-256-ctr':
                 iv = crypto.randomBytes(16);
@@ -272,7 +274,7 @@ class ProxyServer {
                 encrypted = Buffer.concat([encrypted, cipher.final()]);
                 return {
                     iv: iv.toString('hex'),
-                        encrypted: encrypted.toString('hex')
+                    encrypted: encrypted.toString('hex')
                 };
             case 'aes-256-cfb':
                 iv = crypto.randomBytes(16);
@@ -282,7 +284,7 @@ class ProxyServer {
                 encrypted = Buffer.concat([encrypted, cipher.final()]);
                 return {
                     iv: iv.toString('hex'),
-                        encrypted: encrypted.toString('hex')
+                    encrypted: encrypted.toString('hex')
                 };
             case 'des-cbc':
                 iv = crypto.randomBytes(key.length / 2);
@@ -292,7 +294,7 @@ class ProxyServer {
                 encrypted = Buffer.concat([encrypted, cipher.final()]);
                 return {
                     iv: iv.toString('hex'),
-                        encrypted: encrypted.toString('hex')
+                    encrypted: encrypted.toString('hex')
                 };
             case 'des-cfb':
                 iv = crypto.randomBytes(key.length / 2);
@@ -302,7 +304,7 @@ class ProxyServer {
                 encrypted = Buffer.concat([encrypted, cipher.final()]);
                 return {
                     iv: iv.toString('hex'),
-                        encrypted: encrypted.toString('hex')
+                    encrypted: encrypted.toString('hex')
                 };
             case 'host':
                 // Pentru criptarea adresei resursei se folosește
@@ -313,7 +315,7 @@ class ProxyServer {
                 encrypted = Buffer.concat([encrypted, cipher.final()]);
                 return {
                     iv: iv.toString('hex'),
-                        encrypted: encrypted.toString('hex')
+                    encrypted: encrypted.toString('hex')
                 };
             default:
                 break;
