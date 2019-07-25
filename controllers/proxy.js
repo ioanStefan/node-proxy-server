@@ -166,6 +166,7 @@ class ProxyServer {
                     JSON.parse(dataDecrypted)
                 )
             }
+            return res.status(response.statusCode).send(dataDecrypted);
         });
     }
     /**
@@ -206,7 +207,6 @@ class ProxyServer {
             // se decriptează datele trimise de acesta.
             dataDecrypted = this.decrypt(dataEncrypted,
                 targetClientKey.key, dataIv, targetClientKey.startegy);
-
         // Se verifică metoda și se execută cererea specifică
         switch (method) {
             case "GET":
@@ -224,11 +224,9 @@ class ProxyServer {
                     })
                 break;
             case "POST":
-                // Se execută cere de tip POST către resursă                
+                // Se execută cere de tip POST către resursă
                 request.post(targetClient, {
-                    form: {
-                        dataDecrypted
-                    }
+                    form: dataDecrypted
                 }, (err, response, body) => {
                     if (err)
                         return res.status(500).send('Internal server error!');

@@ -39,7 +39,7 @@ router.put('/targets', function (req, res, next) {
 })
 
 // Delete target
-router.delete('/targets/:hostname', function (req, res, next) {
+router.delete('/targets/:proxy/:target', function (req, res, next) {
   ConfigServer.removeTarget(req, res);
 })
 
